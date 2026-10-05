@@ -225,6 +225,12 @@ fn ensure_bundled_moleworld() -> Option<String> {
 /// paths.rs get_macos_bundled_resources_path iOS arm).
 #[cfg(target_os = "ios")]
 pub fn ios_entry() {
+    // [离线弹框修复 2026-10-05] v0.0.8 起 UIAlertView 改为"真弹框",默认需玩家手动点击才
+    // dismiss。离线单机游玩时,游戏连弹多个「无法连接网络」框,把标题画面挡在加载前,表现为
+    // "卡主界面、要点屏幕才能继续"。恢复 v0.0.7 的无打扰行为:所有弹框 show 后约 1 帧自动按
+    // 索引 0 关闭(即 auto_dismiss_mode 的 MOLE_ALERT_AUTODISMISS=1)。若想改回手动确认,
+    // 删掉下面这一行重编即可。
+    std::env::set_var("MOLE_ALERT_AUTODISMISS", "1");
     std::panic::set_hook(Box::new(|info| {
         let payload = if let Some(s) = info.payload().downcast_ref::<&str>() {
             s
